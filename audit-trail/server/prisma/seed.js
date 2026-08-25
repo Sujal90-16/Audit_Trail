@@ -26,6 +26,14 @@ async function main() {
 
   const priya = await prisma.user.create({
     data: {
+      name: "Priyanshu raj",
+      email: "priyanshu@audittrail.com",
+      role: "USER",
+    },
+  });
+
+  const priya = await prisma.user.create({
+    data: {
       name: "Priya Patil",
       email: "priya@audittrail.com",
       role: "USER",
