@@ -41,3 +41,16 @@ export const appendEvent = async ({
     },
   });
 };
+
+export const getEventsByAggregateId = async (
+  aggregateId: string
+) => {
+  return prisma.event.findMany({
+    where: {
+      aggregateId,
+    },
+    orderBy: {
+      version: "asc",
+    },
+  });
+};

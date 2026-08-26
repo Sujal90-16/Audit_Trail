@@ -3,7 +3,10 @@ import { EventType } from "../generated/prisma/client.js";
 
 import type { AuthenticatedRequest } from "../middleware/auth.middleware.js";
 
-import { appendEvent } from "../services/eventStore.service.js";
+import {
+  appendEvent,
+  getEventsByAggregateId,
+} from "../services/eventStore.service.js";
 
 export const createEvent = async (
   req: AuthenticatedRequest,
@@ -50,6 +53,38 @@ export const createEvent = async (
     });
   } catch (error) {
     console.error("Create event error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getEvents = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const aggregateId = req.params.aggregateId;
+
+    if (typeof aggregateId !== "string" || !aggregateId) {
+      res.status(400).json({
+        success: false,
+        message: "aggregateId is required",
+      });
+      return;
+    }
+
+    const events = await getEventsByAggregateId(aggregateId);
+
+    res.status(200).json({
+      success: true,
+      message: "Events retrieved successfully",
+      data: events,
+    });
+  } catch (error) {
+    console.error("Get events error:", error);
 
     res.status(500).json({
       success: false,

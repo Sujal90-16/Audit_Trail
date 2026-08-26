@@ -1,6 +1,10 @@
 import { Router } from "express";
 
-import { createEvent } from "../controllers/event.controller";
+import {
+  createEvent,
+  getEvents,
+} from "../controllers/event.controller";
+
 import {
   requireAuth,
   type AuthenticatedRequest,
@@ -8,11 +12,21 @@ import {
 
 const router = Router();
 
+// Create a new event
 router.post(
   "/",
   requireAuth,
   (req: AuthenticatedRequest, res, next) => {
     void createEvent(req, res).catch(next);
+  }
+);
+
+// Get all events for an aggregate
+router.get(
+  "/:aggregateId",
+  requireAuth,
+  (req: AuthenticatedRequest, res, next) => {
+    void getEvents(req, res).catch(next);
   }
 );
 
