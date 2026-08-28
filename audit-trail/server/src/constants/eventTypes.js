@@ -18,5 +18,4 @@ const constants = {
         SERVER_ERROR: "Internal server error"
     }
 };
-
 module.exports = constants;
