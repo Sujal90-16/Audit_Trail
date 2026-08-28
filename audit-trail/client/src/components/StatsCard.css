@@ -1,0 +1,93 @@
+/* ========================================
+   StatsCard Component Styles
+   ======================================== */
+
+.stats-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.stats-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-accent), transparent);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.stats-card:hover::before {
+  opacity: 1;
+}
+
+.stats-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.stats-card-title {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.stats-card-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+}
+
+.stats-card-icon--package {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--color-info);
+}
+
+.stats-card-icon--activity {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--color-success);
+}
+
+.stats-card-icon--alert {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--color-warning);
+}
+
+.stats-card-icon--clock {
+  background: rgba(168, 85, 247, 0.1);
+  color: #a855f7;
+}
+
+.stats-card-value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.stats-card-change {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.stats-card-change--positive {
+  color: var(--color-success);
+}
+
+.stats-card-change--negative {
+  color: var(--color-danger);
+}
+
+.change-arrow {
+  font-size: var(--font-size-sm);
+}
