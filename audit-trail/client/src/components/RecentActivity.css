@@ -1,5 +1,5 @@
 /* ========================================
-   RecentActivity Component Styles
+   RecentActivity — Light Gradient Theme
    ======================================== */
 
 .recent-activity {
@@ -15,10 +15,10 @@
 
 .activity-count {
   font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-  font-weight: var(--font-weight-medium);
+  color: var(--color-accent);
+  font-weight: var(--font-weight-semibold);
   padding: var(--space-1) var(--space-3);
-  background: var(--color-bg-secondary);
+  background: var(--color-accent-light);
   border-radius: var(--radius-full);
 }
 
@@ -30,45 +30,53 @@
 .activity-item {
   display: flex;
   gap: var(--space-3);
-  padding: var(--space-3) var(--space-2);
+  padding: var(--space-3) var(--space-3);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: background var(--transition-fast);
+  transition: all var(--transition-base);
   animation: fadeIn 0.3s ease forwards;
   opacity: 0;
   position: relative;
 }
 
 .activity-item:hover {
-  background: var(--color-bg-card-hover);
+  background: var(--color-bg-input);
+  transform: translateX(4px);
 }
 
 /* Vertical connector line between dots */
 .activity-item:not(:last-child)::before {
   content: '';
   position: absolute;
-  left: calc(var(--space-2) + 5px);
-  top: calc(var(--space-3) + 14px);
+  left: calc(var(--space-3) + 5px);
+  top: calc(var(--space-3) + 16px);
   bottom: calc(-1 * var(--space-3) + 4px);
-  width: 1px;
-  background: var(--color-border);
+  width: 2px;
+  background: linear-gradient(180deg, var(--color-border), transparent);
+  border-radius: 1px;
 }
 
 .activity-dot {
   flex-shrink: 0;
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  margin-top: 6px;
+  margin-top: 5px;
   position: relative;
   z-index: 1;
+  transition: all var(--transition-spring);
+  border: 2px solid var(--color-bg-card);
 }
 
-.activity-dot--created  { background: var(--color-event-created); box-shadow: 0 0 8px rgba(34, 197, 94, 0.3); }
-.activity-dot--loaded   { background: var(--color-event-loaded);  box-shadow: 0 0 8px rgba(59, 130, 246, 0.3); }
-.activity-dot--temperature { background: var(--color-event-temperature); box-shadow: 0 0 8px rgba(245, 158, 11, 0.3); }
-.activity-dot--arrived  { background: var(--color-event-arrived); box-shadow: 0 0 8px rgba(168, 85, 247, 0.3); }
-.activity-dot--default  { background: var(--color-event-default); box-shadow: 0 0 8px rgba(99, 140, 255, 0.3); }
+.activity-item:hover .activity-dot {
+  transform: scale(1.3);
+}
+
+.activity-dot--created     { background: var(--color-event-created);     box-shadow: 0 0 10px rgba(67, 233, 123, 0.3); }
+.activity-dot--loaded      { background: var(--color-event-loaded);      box-shadow: 0 0 10px rgba(79, 172, 254, 0.3); }
+.activity-dot--temperature { background: var(--color-event-temperature); box-shadow: 0 0 10px rgba(253, 160, 133, 0.3); }
+.activity-dot--arrived     { background: var(--color-event-arrived);     box-shadow: 0 0 10px rgba(161, 140, 209, 0.3); }
+.activity-dot--default     { background: var(--color-event-default);     box-shadow: 0 0 10px rgba(102, 126, 234, 0.3); }
 
 .activity-content {
   flex: 1;
@@ -85,17 +93,19 @@
 
 .activity-type {
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   font-family: var(--font-mono);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
 }
 
-.activity-type--created     { color: var(--color-event-created); }
-.activity-type--loaded      { color: var(--color-event-loaded); }
-.activity-type--temperature { color: var(--color-event-temperature); }
-.activity-type--arrived     { color: var(--color-event-arrived); }
-.activity-type--default     { color: var(--color-event-default); }
+.activity-type--created     { color: var(--color-success-text); background: rgba(67, 233, 123, 0.1); }
+.activity-type--loaded      { color: var(--color-info-text);    background: rgba(79, 172, 254, 0.1); }
+.activity-type--temperature { color: var(--color-warning-text); background: rgba(253, 160, 133, 0.1); }
+.activity-type--arrived     { color: var(--color-purple);       background: rgba(161, 140, 209, 0.1); }
+.activity-type--default     { color: var(--color-accent);       background: var(--color-accent-light); }
 
 .activity-time {
   font-size: var(--font-size-xs);
@@ -120,7 +130,13 @@
 .activity-shipment {
   color: var(--color-accent);
   font-family: var(--font-mono);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
+  transition: color var(--transition-fast);
+}
+
+.activity-item:hover .activity-shipment {
+  color: var(--color-accent-hover);
+  text-decoration: underline;
 }
 
 .activity-separator {

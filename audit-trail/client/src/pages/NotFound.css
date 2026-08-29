@@ -1,5 +1,5 @@
 /* ========================================
-   NotFound Page Styles
+   NotFound Page — Light Gradient Theme
    ======================================== */
 
 .not-found {
@@ -15,21 +15,23 @@
 }
 
 .not-found-code {
-  font-size: 7rem;
-  font-weight: var(--font-weight-bold);
+  font-size: 8rem;
+  font-weight: var(--font-weight-extrabold);
   line-height: 1;
-  background: linear-gradient(135deg, var(--color-accent), #a855f7);
+  background: var(--gradient-ocean);
+  background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin-bottom: var(--space-4);
   letter-spacing: -0.04em;
   user-select: none;
+  animation: gradientShift 4s ease infinite;
 }
 
 .not-found-title {
   font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   margin-bottom: var(--space-3);
 }
@@ -52,31 +54,51 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-3) var(--space-5);
-  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-full);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
-  transition: all var(--transition-fast);
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
 }
 
 .not-found-btn--primary {
-  background: var(--color-accent);
+  background: var(--gradient-primary);
   color: var(--color-text-inverse);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+}
+
+.not-found-btn--primary::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  transition: left 0.5s ease;
+}
+
+.not-found-btn--primary:hover::after {
+  left: 100%;
 }
 
 .not-found-btn--primary:hover {
-  background: var(--color-accent-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
 }
 
 .not-found-btn--secondary {
-  background: var(--color-bg-card);
+  background: var(--color-bg-secondary);
   color: var(--color-text-secondary);
   border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
 }
 
 .not-found-btn--secondary:hover {
-  border-color: var(--color-border-focus);
-  color: var(--color-text-primary);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }

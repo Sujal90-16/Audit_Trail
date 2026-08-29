@@ -1,12 +1,15 @@
 /* ========================================
-   StatsCard Component Styles
+   StatsCard — Light Gradient Theme
    ======================================== */
 
 .stats-card {
   position: relative;
   overflow: hidden;
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-base);
 }
 
+/* Gradient top accent bar */
 .stats-card::before {
   content: '';
   position: absolute;
@@ -14,12 +17,40 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--color-accent), transparent);
-  opacity: 0;
-  transition: opacity var(--transition-base);
+  transition: height var(--transition-base), opacity var(--transition-base);
 }
 
+.stats-card:nth-child(1)::before { background: var(--gradient-accent); }
+.stats-card:nth-child(2)::before { background: var(--gradient-mint); }
+.stats-card:nth-child(3)::before { background: var(--gradient-warm); }
+.stats-card:nth-child(4)::before { background: var(--gradient-cool); }
+
 .stats-card:hover::before {
+  height: 4px;
+}
+
+.stats-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Subtle gradient background on hover */
+.stats-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity var(--transition-base);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.stats-card:nth-child(1)::after { background: linear-gradient(135deg, rgba(79, 172, 254, 0.03), rgba(0, 242, 254, 0.03)); }
+.stats-card:nth-child(2)::after { background: linear-gradient(135deg, rgba(67, 233, 123, 0.03), rgba(56, 249, 215, 0.03)); }
+.stats-card:nth-child(3)::after { background: linear-gradient(135deg, rgba(250, 112, 154, 0.03), rgba(254, 225, 64, 0.03)); }
+.stats-card:nth-child(4)::after { background: linear-gradient(135deg, rgba(161, 140, 209, 0.03), rgba(251, 194, 235, 0.03)); }
+
+.stats-card:hover::after {
   opacity: 1;
 }
 
@@ -28,6 +59,8 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: var(--space-3);
+  position: relative;
+  z-index: 1;
 }
 
 .stats-card-title {
@@ -37,39 +70,47 @@
 }
 
 .stats-card-icon {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-md);
+  transition: all var(--transition-spring);
+}
+
+.stats-card:hover .stats-card-icon {
+  transform: scale(1.1) rotate(-5deg);
 }
 
 .stats-card-icon--package {
-  background: rgba(59, 130, 246, 0.1);
-  color: var(--color-info);
+  background: linear-gradient(135deg, rgba(79, 172, 254, 0.12), rgba(0, 242, 254, 0.08));
+  color: var(--color-info-text);
 }
 
 .stats-card-icon--activity {
-  background: rgba(34, 197, 94, 0.1);
-  color: var(--color-success);
+  background: linear-gradient(135deg, rgba(67, 233, 123, 0.12), rgba(56, 249, 215, 0.08));
+  color: var(--color-success-text);
 }
 
 .stats-card-icon--alert {
-  background: rgba(245, 158, 11, 0.1);
-  color: var(--color-warning);
+  background: linear-gradient(135deg, rgba(250, 112, 154, 0.12), rgba(254, 225, 64, 0.08));
+  color: var(--color-warning-text);
 }
 
 .stats-card-icon--clock {
-  background: rgba(168, 85, 247, 0.1);
-  color: #a855f7;
+  background: linear-gradient(135deg, rgba(161, 140, 209, 0.12), rgba(251, 194, 235, 0.08));
+  color: var(--color-purple);
 }
 
 .stats-card-value {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-extrabold);
   color: var(--color-text-primary);
   margin-bottom: var(--space-2);
+  position: relative;
+  z-index: 1;
+  letter-spacing: -0.02em;
 }
 
 .stats-card-change {
@@ -77,17 +118,28 @@
   align-items: center;
   gap: var(--space-1);
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
+  position: relative;
+  z-index: 1;
 }
 
 .stats-card-change--positive {
-  color: var(--color-success);
+  color: var(--color-success-text);
 }
 
 .stats-card-change--negative {
-  color: var(--color-danger);
+  color: var(--color-danger-text);
 }
 
 .change-arrow {
   font-size: var(--font-size-sm);
+  transition: transform var(--transition-spring);
+}
+
+.stats-card:hover .stats-card-change--positive .change-arrow {
+  transform: translateY(-2px);
+}
+
+.stats-card:hover .stats-card-change--negative .change-arrow {
+  transform: translateY(2px);
 }
