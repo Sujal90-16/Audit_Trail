@@ -1,0 +1,68 @@
+/* ========================================
+   ErrorMessage Component Styles
+   ======================================== */
+
+.error-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-12) var(--space-6);
+  min-height: 300px;
+}
+
+.error-icon {
+  margin-bottom: var(--space-4);
+  opacity: 0.6;
+}
+
+.error-message--error .error-icon {
+  color: var(--color-danger);
+}
+
+.error-message--warning .error-icon {
+  color: var(--color-warning);
+}
+
+.error-message--not-found .error-icon {
+  color: var(--color-text-muted);
+}
+
+.error-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.error-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  max-width: 400px;
+  line-height: 1.6;
+  margin-bottom: var(--space-6);
+}
+
+.error-retry-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-5);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  transition: all var(--transition-fast);
+}
+
+.error-retry-btn:hover {
+  background: var(--color-accent-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.error-retry-btn:active {
+  transform: translateY(0);
+}

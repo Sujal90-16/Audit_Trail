@@ -1,21 +1,55 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../components/Toast';
 import SearchBar from '../components/SearchBar';
 import StatsCard from '../components/StatsCard';
+import RecentActivity from '../components/RecentActivity';
 import './Dashboard.css';
+
+/**
+ * Validates a shipment ID format.
+ * Accepted formats: SHIP-YYYY-NNNN or any alphanumeric with hyphens (min 3 chars).
+ */
+function validateShipmentId(id) {
+  if (!id || id.trim().length < 3) {
+    return { valid: false, message: 'Shipment ID must be at least 3 characters long.' };
+  }
+  if (!/^[A-Za-z0-9\-]+$/.test(id.trim())) {
+    return { valid: false, message: 'Shipment ID can only contain letters, numbers, and hyphens.' };
+  }
+  return { valid: true };
+}
 
 function Dashboard() {
   const navigate = useNavigate();
-  const [recentSearches] = useState([
+  const { addToast } = useToast();
+  const [recentSearches, setRecentSearches] = useState([
     'SHIP-2024-0847',
     'SHIP-2024-0621',
     'SHIP-2024-0103',
   ]);
 
   const handleSearch = (shipmentId) => {
-    if (shipmentId.trim()) {
-      navigate(`/shipment/${shipmentId.trim()}`);
+    const trimmed = shipmentId.trim();
+    const validation = validateShipmentId(trimmed);
+
+    if (!validation.valid) {
+      addToast({ type: 'warning', message: validation.message });
+      return;
     }
+
+    // Add to recent searches (avoid duplicates, keep max 5)
+    setRecentSearches((prev) => {
+      const filtered = prev.filter((s) => s !== trimmed);
+      return [trimmed, ...filtered].slice(0, 5);
+    });
+
+    addToast({ type: 'info', message: `Searching for shipment ${trimmed}...`, duration: 2000 });
+    navigate(`/shipment/${trimmed}`);
+  };
+
+  const handleActivityClick = (shipmentId) => {
+    navigate(`/shipment/${shipmentId}`);
   };
 
   return (
@@ -119,6 +153,9 @@ function Dashboard() {
           </button>
         </div>
       </section>
+
+      {/* Recent Activity Feed */}
+      <RecentActivity onShipmentClick={handleActivityClick} />
     </div>
   );
 }
