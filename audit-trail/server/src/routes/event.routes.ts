@@ -3,12 +3,13 @@ import { Router } from "express";
 import {
   createEvent,
   getEvents,
-} from "../controllers/event.controller";
+  getShipmentState,
+} from "../controllers/event.controller.js";
 
 import {
   requireAuth,
   type AuthenticatedRequest,
-} from "../middleware/auth.middleware";
+} from "../middleware/auth.middleware.js";
 
 const router = Router();
 
@@ -18,6 +19,15 @@ router.post(
   requireAuth,
   (req: AuthenticatedRequest, res, next) => {
     void createEvent(req, res).catch(next);
+  }
+);
+
+// Reconstruct current state by replaying all events
+router.get(
+  "/:aggregateId/state",
+  requireAuth,
+  (req: AuthenticatedRequest, res, next) => {
+    void getShipmentState(req, res).catch(next);
   }
 );
 

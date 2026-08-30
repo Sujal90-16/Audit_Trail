@@ -50,3 +50,20 @@ model Event {
   @@index([eventType])
   @@index([timestamp])
 }
+
+model ShipmentReadModel {
+  aggregateId     String  @id
+  version         Int
+  status          String?
+  location        String?
+  containerNumber String?
+  shipName        String?
+  port            String?
+  deliveredAt     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([location])
+}
