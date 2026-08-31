@@ -1,0 +1,90 @@
+/* ========================================
+   EventBadge Component Styles
+   ======================================== */
+
+.event-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+/* Sizes */
+.event-badge--sm {
+  font-size: 0.65rem;
+  padding: 2px 10px;
+}
+
+.event-badge--md {
+  font-size: var(--font-size-xs);
+  padding: 4px 12px;
+}
+
+/* Dot */
+.event-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Color Variants */
+.event-badge--created {
+  color: var(--color-success-text);
+  background: rgba(67, 233, 123, 0.1);
+}
+.event-badge-dot--created { background: var(--color-event-created); }
+
+.event-badge--loaded {
+  color: var(--color-info-text);
+  background: rgba(79, 172, 254, 0.1);
+}
+.event-badge-dot--loaded { background: var(--color-event-loaded); }
+
+.event-badge--temperature {
+  color: var(--color-warning-text);
+  background: rgba(253, 160, 133, 0.12);
+}
+.event-badge-dot--temperature { background: var(--color-event-temperature); }
+
+.event-badge--arrived {
+  color: var(--color-purple);
+  background: rgba(161, 140, 209, 0.1);
+}
+.event-badge-dot--arrived { background: var(--color-event-arrived); }
+
+.event-badge--customs {
+  color: #0e7490;
+  background: rgba(14, 116, 144, 0.08);
+}
+.event-badge-dot--customs { background: #06b6d4; }
+
+.event-badge--delivered {
+  color: var(--color-success-text);
+  background: rgba(67, 233, 123, 0.12);
+}
+.event-badge-dot--delivered { background: #22c55e; }
+
+.event-badge--inspection {
+  color: #7c3aed;
+  background: rgba(124, 58, 237, 0.08);
+}
+.event-badge-dot--inspection { background: #8b5cf6; }
+
+.event-badge--default {
+  color: var(--color-accent);
+  background: var(--color-accent-light);
+}
+.event-badge-dot--default { background: var(--color-accent); }
+
+/* Hover effect */
+.event-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
