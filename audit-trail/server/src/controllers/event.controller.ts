@@ -13,6 +13,10 @@ import {
   replayShipmentEvents,
 } from "../services/eventReplay.service.js";
 
+import {
+  rebuildShipmentProjection,
+} from "../services/shipmentProjector.service.js";
+
 // Create a new event
 export const createEvent = async (
   req: AuthenticatedRequest,
@@ -172,6 +176,52 @@ export const getShipmentState = async (
     });
   } catch (error) {
     console.error("Get shipment state error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+// Rebuild CQRS shipment read model from historical events
+export const rebuildShipmentProjectionController = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const { aggregateId } = req.params;
+
+    if (!aggregateId || Array.isArray(aggregateId)) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid aggregateId",
+      });
+      return;
+    }
+
+    const projection = await rebuildShipmentProjection(
+      aggregateId
+    );
+
+    if (!projection) {
+      res.status(404).json({
+        success: false,
+        message: "No events found for this aggregate",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Shipment projection rebuilt successfully",
+      data: projection,
+    });
+  } catch (error) {
+    console.error(
+      "Rebuild shipment projection error:",
+      error
+    );
 
     res.status(500).json({
       success: false,

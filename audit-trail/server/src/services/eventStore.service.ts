@@ -4,6 +4,8 @@ import {
   type Prisma,
 } from "../generated/prisma/client.js";
 
+import { projectShipmentEvent } from "./shipmentProjector.service.js";
+
 export interface AppendEventInput {
   aggregateId: string;
   eventType: EventType;
@@ -37,7 +39,7 @@ export const appendEvent = async ({
   createdById,
   expectedVersion,
 }: AppendEventInput) => {
-  return prisma.$transaction(async (tx) => {
+  const event = await prisma.$transaction(async (tx) => {
     const latestEvent = await tx.event.findFirst({
       where: {
         aggregateId,
@@ -61,54 +63,21 @@ export const appendEvent = async ({
 
     const nextVersion = currentVersion + 1;
 
-    try {
-      return await tx.event.create({
-        data: {
-          aggregateId,
-          eventType,
-          payload,
-          version: nextVersion,
-          createdById,
-        },
-      });
-    } catch (error: unknown) {
-      /*
-       * PostgreSQL/Prisma final protection against a race condition.
-       *
-       * The Event model has:
-       * @@unique([aggregateId, version])
-       *
-       * If two simultaneous transactions both attempt to create
-       * the same aggregate version, one of them will fail here.
-       */
-
-      if (
-        typeof error === "object" &&
-        error !== null &&
-        "code" in error &&
-        error.code === "P2002"
-      ) {
-        const latest = await tx.event.findFirst({
-          where: {
-            aggregateId,
-          },
-          orderBy: {
-            version: "desc",
-          },
-          select: {
-            version: true,
-          },
-        });
-
-        throw new VersionConflictError(
-          latest?.version ?? currentVersion,
-          expectedVersion
-        );
-      }
-
-      throw error;
-    }
+    return tx.event.create({
+      data: {
+        aggregateId,
+        eventType,
+        payload,
+        version: nextVersion,
+        createdById,
+      },
+    });
   });
+
+  // Update CQRS read model after the event is successfully stored
+  await projectShipmentEvent(event);
+
+  return event;
 };
 
 export const getEventsByAggregateId = async (

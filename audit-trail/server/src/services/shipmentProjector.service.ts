@@ -1,4 +1,7 @@
-import { EventType, type Prisma } from "../generated/prisma/client.js";
+import {
+  EventType,
+  type Prisma,
+} from "../generated/prisma/client.js";
 
 import { prisma } from "../config/prisma.js";
 
@@ -45,6 +48,7 @@ const getString = (
     : undefined;
 };
 
+// Project a single event into the CQRS ShipmentReadModel
 export const projectShipmentEvent = async (
   event: ProjectableEvent
 ) => {
@@ -57,11 +61,8 @@ export const projectShipmentEvent = async (
       },
     });
 
-  /*
-   * Ignore events that have already been projected.
-   *
-   * This makes the projector idempotent.
-   */
+  // Ignore events that have already been projected.
+  // This makes the projector idempotent.
   if (
     existingProjection &&
     existingProjection.version >= event.version
@@ -145,11 +146,8 @@ export const projectShipmentEvent = async (
       break;
 
     case EventType.TEMPERATURE_SPIKE:
-      /*
-       * A temperature spike is an audit event.
-       * It currently does not modify the shipment
-       * read model fields.
-       */
+      // Audit event only.
+      // No shipment read model fields are changed.
       break;
 
     default:
@@ -180,6 +178,45 @@ export const projectShipmentEvent = async (
       shipName: projection.shipName,
       port: projection.port,
       deliveredAt: projection.deliveredAt,
+    },
+  });
+};
+
+// Rebuild the CQRS read model from all historical events
+export const rebuildShipmentProjection = async (
+  aggregateId: string
+) => {
+  // Remove the existing projection so it can be rebuilt
+  // completely from the event history.
+  await prisma.shipmentReadModel.deleteMany({
+    where: {
+      aggregateId,
+    },
+  });
+
+  // Fetch historical events in version order.
+  const events = await prisma.event.findMany({
+    where: {
+      aggregateId,
+    },
+    orderBy: {
+      version: "asc",
+    },
+  });
+
+  if (events.length === 0) {
+    return null;
+  }
+
+  // Replay every historical event through the projector.
+  for (const event of events) {
+    await projectShipmentEvent(event);
+  }
+
+  // Return the final persistent read model.
+  return prisma.shipmentReadModel.findUnique({
+    where: {
+      aggregateId,
     },
   });
 };

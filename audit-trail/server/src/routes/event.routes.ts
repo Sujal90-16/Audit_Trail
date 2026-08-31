@@ -4,6 +4,7 @@ import {
   createEvent,
   getEvents,
   getShipmentState,
+  rebuildShipmentProjectionController,
 } from "../controllers/event.controller.js";
 
 import {
@@ -19,6 +20,18 @@ router.post(
   requireAuth,
   (req: AuthenticatedRequest, res, next) => {
     void createEvent(req, res).catch(next);
+  }
+);
+
+// Rebuild the CQRS shipment projection
+router.post(
+  "/:aggregateId/rebuild",
+  requireAuth,
+  (req: AuthenticatedRequest, res, next) => {
+    void rebuildShipmentProjectionController(
+      req,
+      res
+    ).catch(next);
   }
 );
 
