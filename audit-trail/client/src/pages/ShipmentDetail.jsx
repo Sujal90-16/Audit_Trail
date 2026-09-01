@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
+import Timeline from '../components/Timeline';
 import { useToast } from '../components/Toast';
 import './ShipmentDetail.css';
 
@@ -59,12 +60,7 @@ const MOCK_SHIPMENTS = {
   },
 };
 
-const EVENT_TYPE_COLORS = {
-  CONTAINER_CREATED: 'created',
-  LOADED_ON_SHIP: 'loaded',
-  TEMPERATURE_SPIKE: 'temperature',
-  ARRIVED_AT_PORT: 'arrived',
-};
+// EVENT_TYPE_COLORS removed — now handled by the Timeline component
 
 function ShipmentDetail() {
   const { id } = useParams();
@@ -202,34 +198,9 @@ function ShipmentDetail() {
           </div>
         </div>
 
-        {/* Event History Card */}
+        {/* Event History — uses the Timeline component */}
         <div className="card detail-events">
-          <div className="events-header">
-            <h2 className="section-title">Event History</h2>
-            <span className="events-count">{shipment.events.length} events</span>
-          </div>
-          <div className="events-timeline">
-            {shipment.events.map((event, index) => (
-              <div key={index} className="event-item" style={{ animationDelay: `${index * 0.1}s` }}>
-                <div className={`event-dot event-dot--${EVENT_TYPE_COLORS[event.type] || 'default'}`} />
-                <div className="event-content">
-                  <div className="event-top-row">
-                    <span className={`event-type event-type--${EVENT_TYPE_COLORS[event.type] || 'default'}`}>
-                      {event.type.replace(/_/g, ' ')}
-                    </span>
-                  </div>
-                  <p className="event-detail">{event.detail}</p>
-                  <div className="event-meta">
-                    <span className="event-time">
-                      {new Date(event.timestamp).toLocaleString()}
-                    </span>
-                    <span className="event-separator">·</span>
-                    <span className="event-actor">{event.actor}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <Timeline events={shipment.events} title="Event History" />
         </div>
       </div>
     </div>
