@@ -3,8 +3,9 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 
-import authRoutes from "./routes/auth.routes";
-import eventRoutes from "./routes/event.routes";
+import authRoutes from "./routes/auth.routes.js";
+import eventRoutes from "./routes/event.routes.js";
+import shipmentRoutes from "./routes/shipment.routes.js";
 
 const app = express();
 
@@ -14,7 +15,7 @@ app.use(
   cors({
     origin: "http://localhost:5173",
     credentials: true,
-  }),
+  })
 );
 
 app.use(express.json());
@@ -33,5 +34,6 @@ app.get("/health", (_req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/shipments", shipmentRoutes);
 
 export default app;
