@@ -1,9 +1,11 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
+export type UserRole = "USER" | "MANAGER" | "ADMIN";
+
 interface AuthPayload {
   userId: string;
-  role: string;
+  role: UserRole;
 }
 
 export interface AuthenticatedRequest extends Request {
@@ -50,6 +52,18 @@ export const requireAuth = (
 
     const decoded = jwt.verify(token, secret) as AuthPayload;
 
+    if (
+      decoded.role !== "USER" &&
+      decoded.role !== "MANAGER" &&
+      decoded.role !== "ADMIN"
+    ) {
+      res.status(401).json({
+        success: false,
+        message: "Invalid user role",
+      });
+      return;
+    }
+
     req.user = {
       userId: decoded.userId,
       role: decoded.role,
@@ -64,4 +78,32 @@ export const requireAuth = (
       message: "Invalid or expired token",
     });
   }
+};
+
+export const requireRole = (
+  ...allowedRoles: UserRole[]
+) => {
+  return (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): void => {
+    if (!req.user) {
+      res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+      return;
+    }
+
+    if (!allowedRoles.includes(req.user.role)) {
+      res.status(403).json({
+        success: false,
+        message: "You do not have permission to perform this action",
+      });
+      return;
+    }
+
+    next();
+  };
 };
