@@ -1,37 +1,37 @@
-import { Router } from "express";
+import type {
+  NextFunction,
+  Response,
+} from "express";
 
-import {
-  register,
-  login,
-} from "../controllers/auth.controller";
+import type {
+  AuthenticatedRequest,
+} from "./auth.middleware.js";
 
-import {
-  requireAuth,
-  type AuthenticatedRequest,
-} from "../middleware/auth.middleware";
+export const requireRole = (
+  ...allowedRoles: string[]
+) => {
+  return (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): void => {
+    if (!req.user) {
+      res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+      return;
+    }
 
-const router = Router();
+    if (!allowedRoles.includes(req.user.role)) {
+      res.status(403).json({
+        success: false,
+        message:
+          "You do not have permission to perform this action",
+      });
+      return;
+    }
 
-// Register
-router.post("/register", register);
-
-// Login
-router.post("/login", login);
-
-// Get current authenticated user
-router.get(
-  "/me",
-  requireAuth,
-  (req: AuthenticatedRequest, res) => {
-    res.status(200).json({
-      success: true,
-      message: "Authenticated user",
-      data: {
-        userId: req.user?.userId,
-        role: req.user?.role,
-      },
-    });
-  }
-);
-
-export default router;
+    next();
+  };
+};

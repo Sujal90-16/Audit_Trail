@@ -9,14 +9,18 @@ import {
 
 import {
   requireAuth,
-  requireRole,
   type AuthenticatedRequest,
 } from "../middleware/auth.middleware.js";
 
+import { requireRole } from "../middleware/role.middleware.js";
+
 const router = Router();
 
-// Create a new event
-// Only MANAGER and ADMIN can modify the event stream
+/*
+ * Create a new event
+ *
+ * Only MANAGER and ADMIN can create events.
+ */
 router.post(
   "/",
   requireAuth,
@@ -26,12 +30,15 @@ router.post(
   }
 );
 
-// Rebuild the CQRS shipment projection
-// Only ADMIN can rebuild projections
+/*
+ * Rebuild the CQRS shipment projection.
+ *
+ * Only MANAGER and ADMIN can rebuild projections.
+ */
 router.post(
   "/:aggregateId/rebuild",
   requireAuth,
-  requireRole("ADMIN"),
+  requireRole("MANAGER", "ADMIN"),
   (req: AuthenticatedRequest, res, next) => {
     void rebuildShipmentProjectionController(
       req,
@@ -40,8 +47,12 @@ router.post(
   }
 );
 
-// Reconstruct current state by replaying all events
-// Any authenticated user can view the reconstructed state
+/*
+ * Reconstruct the current shipment state
+ * by replaying all events.
+ *
+ * Any authenticated user can access this.
+ */
 router.get(
   "/:aggregateId/state",
   requireAuth,
@@ -50,8 +61,11 @@ router.get(
   }
 );
 
-// Get all events for an aggregate
-// Any authenticated user can view event history
+/*
+ * Get all events for an aggregate.
+ *
+ * Any authenticated user can access this.
+ */
 router.get(
   "/:aggregateId",
   requireAuth,
