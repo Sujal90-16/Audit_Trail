@@ -4,23 +4,114 @@ import type { AuthenticatedRequest } from "../middleware/auth.middleware.js";
 
 import { prisma } from "../config/prisma.js";
 
-// Get all shipment read models
+// Get all shipment read models with pagination and filtering
 export const getAllShipments = async (
-  _req: AuthenticatedRequest,
+  req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
   try {
-    const shipments =
-      await prisma.shipmentReadModel.findMany({
-        orderBy: {
-          updatedAt: "desc",
-        },
+    const pageValue = req.query.page;
+    const limitValue = req.query.limit;
+    const statusValue = req.query.status;
+    const locationValue = req.query.location;
+
+    const page =
+      typeof pageValue === "string"
+        ? Number.parseInt(pageValue, 10)
+        : 1;
+
+    const limit =
+      typeof limitValue === "string"
+        ? Number.parseInt(limitValue, 10)
+        : 10;
+
+    if (
+      !Number.isInteger(page) ||
+      page < 1
+    ) {
+      res.status(400).json({
+        success: false,
+        message: "page must be a positive integer",
       });
+      return;
+    }
+
+    if (
+      !Number.isInteger(limit) ||
+      limit < 1 ||
+      limit > 100
+    ) {
+      res.status(400).json({
+        success: false,
+        message:
+          "limit must be an integer between 1 and 100",
+      });
+      return;
+    }
+
+    const status =
+      typeof statusValue === "string"
+        ? statusValue
+        : undefined;
+
+    const location =
+      typeof locationValue === "string"
+        ? locationValue
+        : undefined;
+
+    const where = {
+      ...(status
+        ? {
+            status,
+          }
+        : {}),
+      ...(location
+        ? {
+            location: {
+              equals: location,
+              mode: "insensitive" as const,
+            },
+          }
+        : {}),
+    };
+
+    const skip = (page - 1) * limit;
+
+    const [shipments, totalShipments] =
+      await Promise.all([
+        prisma.shipmentReadModel.findMany({
+          where,
+          orderBy: {
+            updatedAt: "desc",
+          },
+          skip,
+          take: limit,
+        }),
+        prisma.shipmentReadModel.count({
+          where,
+        }),
+      ]);
+
+    const totalPages = Math.ceil(
+      totalShipments / limit
+    );
 
     res.status(200).json({
       success: true,
       message: "Shipments retrieved successfully",
       data: shipments,
+      pagination: {
+        page,
+        limit,
+        totalShipments,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+      filters: {
+        status: status ?? null,
+        location: location ?? null,
+      },
     });
   } catch (error) {
     console.error("Get all shipments error:", error);
