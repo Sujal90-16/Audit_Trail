@@ -1,29 +1,33 @@
+import { EventType } from "../generated/prisma/client.js";
+
 import { prisma } from "../config/prisma.js";
-import {
-  EventType,
-  type Prisma,
-} from "../generated/prisma/client.js";
 
 import { projectShipmentEvent } from "./shipmentProjector.service.js";
 
-export interface AppendEventInput {
+interface AppendEventInput {
   aggregateId: string;
   eventType: EventType;
-  payload: Prisma.InputJsonValue;
-  createdById?: string;
+  payload: unknown;
   expectedVersion: number;
+  createdById: string;
+}
+
+interface GetEventsOptions {
+  limit?: number;
+  offset?: number;
+  eventType?: EventType;
 }
 
 export class VersionConflictError extends Error {
-  public readonly currentVersion: number;
-  public readonly expectedVersion: number;
+  currentVersion: number;
+  expectedVersion: number;
 
   constructor(
     currentVersion: number,
     expectedVersion: number
   ) {
     super(
-      `Version conflict: expected version ${expectedVersion}, current version is ${currentVersion}`
+      `Version conflict. Expected version ${expectedVersion}, but current version is ${currentVersion}`
     );
 
     this.name = "VersionConflictError";
@@ -36,59 +40,84 @@ export const appendEvent = async ({
   aggregateId,
   eventType,
   payload,
-  createdById,
   expectedVersion,
+  createdById,
 }: AppendEventInput) => {
-  const event = await prisma.$transaction(async (tx) => {
-    const latestEvent = await tx.event.findFirst({
-      where: {
-        aggregateId,
-      },
-      orderBy: {
-        version: "desc",
-      },
-      select: {
-        version: true,
-      },
-    });
-
-    const currentVersion = latestEvent?.version ?? 0;
-
-    if (currentVersion !== expectedVersion) {
-      throw new VersionConflictError(
-        currentVersion,
-        expectedVersion
-      );
-    }
-
-    const nextVersion = currentVersion + 1;
-
-    return tx.event.create({
-      data: {
-        aggregateId,
-        eventType,
-        payload,
-        version: nextVersion,
-        createdById,
-      },
-    });
+  const latestEvent = await prisma.event.findFirst({
+    where: {
+      aggregateId,
+    },
+    orderBy: {
+      version: "desc",
+    },
   });
 
-  // Update CQRS read model after the event is successfully stored
+  const currentVersion = latestEvent?.version ?? 0;
+
+  if (currentVersion !== expectedVersion) {
+    throw new VersionConflictError(
+      currentVersion,
+      expectedVersion
+    );
+  }
+
+  const event = await prisma.event.create({
+    data: {
+      aggregateId,
+      eventType,
+      payload:
+        payload as Parameters<
+          typeof prisma.event.create
+        >[0]["data"]["payload"],
+      version: currentVersion + 1,
+      createdById,
+    },
+  });
+
   await projectShipmentEvent(event);
 
   return event;
 };
 
 export const getEventsByAggregateId = async (
-  aggregateId: string
+  aggregateId: string,
+  options: GetEventsOptions = {}
 ) => {
+  const {
+    limit = 20,
+    offset = 0,
+    eventType,
+  } = options;
+
   return prisma.event.findMany({
     where: {
       aggregateId,
+      ...(eventType
+        ? {
+            eventType,
+          }
+        : {}),
     },
     orderBy: {
       version: "asc",
+    },
+    take: limit,
+    skip: offset,
+  });
+};
+
+export const countEventsByAggregateId = async (
+  aggregateId: string,
+  eventType?: EventType
+) => {
+  return prisma.event.count({
+    where: {
+      aggregateId,
+      ...(eventType
+        ? {
+            eventType,
+          }
+        : {}),
     },
   });
 };

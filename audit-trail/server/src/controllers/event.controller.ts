@@ -6,6 +6,7 @@ import type { AuthenticatedRequest } from "../middleware/auth.middleware.js";
 import {
   appendEvent,
   getEventsByAggregateId,
+  countEventsByAggregateId,
   VersionConflictError,
 } from "../services/eventStore.service.js";
 
@@ -108,7 +109,7 @@ export const createEvent = async (
   }
 };
 
-// Get all events for an aggregate
+// Get paginated and filtered events for an aggregate
 export const getEvents = async (
   req: AuthenticatedRequest,
   res: Response
@@ -124,12 +125,75 @@ export const getEvents = async (
       return;
     }
 
-    const events = await getEventsByAggregateId(aggregateId);
+    const limitValue = Number(req.query.limit ?? 20);
+    const offsetValue = Number(req.query.offset ?? 0);
+
+    if (
+      !Number.isInteger(limitValue) ||
+      limitValue < 1 ||
+      limitValue > 100
+    ) {
+      res.status(400).json({
+        success: false,
+        message:
+          "limit must be an integer between 1 and 100",
+      });
+      return;
+    }
+
+    if (
+      !Number.isInteger(offsetValue) ||
+      offsetValue < 0
+    ) {
+      res.status(400).json({
+        success: false,
+        message:
+          "offset must be a non-negative integer",
+      });
+      return;
+    }
+
+    let eventType: EventType | undefined;
+
+    if (req.query.eventType !== undefined) {
+      const eventTypeValue = String(
+        req.query.eventType
+      );
+
+      if (!Object.values(EventType).includes(eventTypeValue as EventType)) {
+        res.status(400).json({
+          success: false,
+          message: "Invalid eventType",
+        });
+        return;
+      }
+
+      eventType = eventTypeValue as EventType;
+    }
+
+    const [events, total] = await Promise.all([
+      getEventsByAggregateId(aggregateId, {
+        limit: limitValue,
+        offset: offsetValue,
+        eventType,
+      }),
+      countEventsByAggregateId(
+        aggregateId,
+        eventType
+      ),
+    ]);
 
     res.status(200).json({
       success: true,
       message: "Events retrieved successfully",
       data: events,
+      pagination: {
+        total,
+        limit: limitValue,
+        offset: offsetValue,
+        hasMore:
+          offsetValue + events.length < total,
+      },
     });
   } catch (error) {
     console.error("Get events error:", error);
@@ -157,7 +221,13 @@ export const getShipmentState = async (
       return;
     }
 
-    const events = await getEventsByAggregateId(aggregateId);
+    const events = await getEventsByAggregateId(
+      aggregateId,
+      {
+        limit: 100,
+        offset: 0,
+      }
+    );
 
     if (events.length === 0) {
       res.status(404).json({
@@ -171,7 +241,8 @@ export const getShipmentState = async (
 
     res.status(200).json({
       success: true,
-      message: "Shipment state reconstructed successfully",
+      message:
+        "Shipment state reconstructed successfully",
       data: state,
     });
   } catch (error) {
@@ -200,21 +271,22 @@ export const rebuildShipmentProjectionController = async (
       return;
     }
 
-    const projection = await rebuildShipmentProjection(
-      aggregateId
-    );
+    const projection =
+      await rebuildShipmentProjection(aggregateId);
 
     if (!projection) {
       res.status(404).json({
         success: false,
-        message: "No events found for this aggregate",
+        message:
+          "No events found for this aggregate",
       });
       return;
     }
 
     res.status(200).json({
       success: true,
-      message: "Shipment projection rebuilt successfully",
+      message:
+        "Shipment projection rebuilt successfully",
       data: projection,
     });
   } catch (error) {
