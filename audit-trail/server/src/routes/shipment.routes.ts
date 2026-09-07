@@ -3,13 +3,23 @@ import { Router } from "express";
 import {
   getAllShipments,
   getShipmentById,
+  getShipmentStats,
 } from "../controllers/shipment.controller.js";
 
 import { requireAuth } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
-// Get all shipment read models
+// Get shipment dashboard statistics
+router.get(
+  "/stats",
+  requireAuth,
+  (req, res, next) => {
+    void getShipmentStats(req, res).catch(next);
+  }
+);
+
+// Get all shipments with pagination and filtering
 router.get(
   "/",
   requireAuth,
@@ -18,7 +28,7 @@ router.get(
   }
 );
 
-// Get one shipment read model by aggregate ID
+// Get one shipment by aggregate ID
 router.get(
   "/:aggregateId",
   requireAuth,

@@ -4,6 +4,69 @@ import type { AuthenticatedRequest } from "../middleware/auth.middleware.js";
 
 import { prisma } from "../config/prisma.js";
 
+// Get shipment dashboard statistics
+export const getShipmentStats = async (
+  _req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const [
+      totalShipments,
+      deliveredShipments,
+      shipmentsByStatus,
+    ] = await Promise.all([
+      prisma.shipmentReadModel.count(),
+
+      prisma.shipmentReadModel.count({
+        where: {
+          status: "DELIVERED",
+        },
+      }),
+
+      prisma.shipmentReadModel.groupBy({
+        by: ["status"],
+        _count: {
+          _all: true,
+        },
+      }),
+    ]);
+
+    const statusCounts = shipmentsByStatus.reduce(
+      (acc, item) => {
+        const status = item.status ?? "UNKNOWN";
+
+        acc[status] = item._count._all;
+
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+
+    res.status(200).json({
+      success: true,
+      message:
+        "Shipment statistics retrieved successfully",
+      data: {
+        totalShipments,
+        deliveredShipments,
+        activeShipments:
+          totalShipments - deliveredShipments,
+        statusCounts,
+      },
+    });
+  } catch (error) {
+    console.error(
+      "Get shipment statistics error:",
+      error
+    );
+
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
 // Get all shipment read models with pagination and filtering
 export const getAllShipments = async (
   req: AuthenticatedRequest,
@@ -87,6 +150,7 @@ export const getAllShipments = async (
           skip,
           take: limit,
         }),
+
         prisma.shipmentReadModel.count({
           where,
         }),
