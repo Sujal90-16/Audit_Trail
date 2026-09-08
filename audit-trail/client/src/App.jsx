@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard';
 import ShipmentDetail from './pages/ShipmentDetail';
 import Shipments from './pages/Shipments';
 import TimelinePage from './pages/TimelinePage';
+import Analytics from './pages/Analytics';
 import NotFound from './pages/NotFound';
 import Sidebar from './components/Sidebar';
 
@@ -16,6 +17,7 @@ function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/shipments" element={<Shipments />} />
           <Route path="/timeline" element={<TimelinePage />} />
+          <Route path="/analytics" element={<Analytics />} />
           <Route path="/shipment/:id" element={<ShipmentDetail />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
