@@ -4,6 +4,7 @@ import { useToast } from '../components/Toast';
 import SearchBar from '../components/SearchBar';
 import StatsCard from '../components/StatsCard';
 import RecentActivity from '../components/RecentActivity';
+import CommandPanel from '../components/CommandPanel';
 import './Dashboard.css';
 
 /**
@@ -23,6 +24,7 @@ function validateShipmentId(id) {
 function Dashboard() {
   const navigate = useNavigate();
   const { addToast } = useToast();
+  const [commandPanelOpen, setCommandPanelOpen] = useState(false);
   const [recentSearches, setRecentSearches] = useState([
     'SHIP-2024-0847',
     'SHIP-2024-0621',
@@ -54,6 +56,7 @@ function Dashboard() {
 
   return (
     <div className="dashboard animate-fade-in">
+      <CommandPanel isOpen={commandPanelOpen} onClose={() => setCommandPanelOpen(false)} />
       <header className="dashboard-header">
         <div className="header-text">
           <h1 className="page-title">Dashboard</h1>
@@ -61,9 +64,17 @@ function Dashboard() {
             Monitor shipments, track events, and audit the immutable ledger
           </p>
         </div>
-        <div className="header-badge">
-          <span className="badge-dot"></span>
-          <span>Live</span>
+        <div className="header-actions">
+          <button className="new-command-btn" onClick={() => setCommandPanelOpen(true)}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            New Command
+          </button>
+          <div className="header-badge">
+            <span className="badge-dot"></span>
+            <span>Live</span>
+          </div>
         </div>
       </header>
 
