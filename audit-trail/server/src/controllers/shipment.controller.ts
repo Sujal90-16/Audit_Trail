@@ -67,7 +67,7 @@ export const getShipmentStats = async (
   }
 };
 
-// Get all shipment read models with pagination and filtering
+// Get all shipment read models with pagination, filtering, and search
 export const getAllShipments = async (
   req: AuthenticatedRequest,
   res: Response
@@ -77,6 +77,7 @@ export const getAllShipments = async (
     const limitValue = req.query.limit;
     const statusValue = req.query.status;
     const locationValue = req.query.location;
+    const searchValue = req.query.search;
 
     const page =
       typeof pageValue === "string"
@@ -113,13 +114,21 @@ export const getAllShipments = async (
     }
 
     const status =
-      typeof statusValue === "string"
-        ? statusValue
+      typeof statusValue === "string" &&
+      statusValue.trim() !== ""
+        ? statusValue.trim()
         : undefined;
 
     const location =
-      typeof locationValue === "string"
-        ? locationValue
+      typeof locationValue === "string" &&
+      locationValue.trim() !== ""
+        ? locationValue.trim()
+        : undefined;
+
+    const search =
+      typeof searchValue === "string" &&
+      searchValue.trim() !== ""
+        ? searchValue.trim()
         : undefined;
 
     const where = {
@@ -128,12 +137,50 @@ export const getAllShipments = async (
             status,
           }
         : {}),
+
       ...(location
         ? {
             location: {
               equals: location,
               mode: "insensitive" as const,
             },
+          }
+        : {}),
+
+      ...(search
+        ? {
+            OR: [
+              {
+                aggregateId: {
+                  contains: search,
+                  mode: "insensitive" as const,
+                },
+              },
+              {
+                containerNumber: {
+                  contains: search,
+                  mode: "insensitive" as const,
+                },
+              },
+              {
+                shipName: {
+                  contains: search,
+                  mode: "insensitive" as const,
+                },
+              },
+              {
+                port: {
+                  contains: search,
+                  mode: "insensitive" as const,
+                },
+              },
+              {
+                location: {
+                  contains: search,
+                  mode: "insensitive" as const,
+                },
+              },
+            ],
           }
         : {}),
     };
@@ -175,6 +222,7 @@ export const getAllShipments = async (
       filters: {
         status: status ?? null,
         location: location ?? null,
+        search: search ?? null,
       },
     });
   } catch (error) {
