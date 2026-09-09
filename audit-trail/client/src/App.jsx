@@ -5,6 +5,7 @@ import ShipmentDetail from './pages/ShipmentDetail';
 import Shipments from './pages/Shipments';
 import TimelinePage from './pages/TimelinePage';
 import Analytics from './pages/Analytics';
+import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
 import Sidebar from './components/Sidebar';
 
@@ -18,6 +19,7 @@ function App() {
           <Route path="/shipments" element={<Shipments />} />
           <Route path="/timeline" element={<TimelinePage />} />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="/shipment/:id" element={<ShipmentDetail />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
