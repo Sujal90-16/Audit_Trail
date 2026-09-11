@@ -12,6 +12,36 @@ export interface AuthenticatedRequest extends Request {
   user?: AuthPayload;
 }
 
+const isUserRole = (value: unknown): value is UserRole => {
+  return (
+    value === "USER" ||
+    value === "MANAGER" ||
+    value === "ADMIN"
+  );
+};
+
+const isValidAuthPayload = (
+  payload: unknown
+): payload is AuthPayload => {
+  if (
+    typeof payload !== "object" ||
+    payload === null
+  ) {
+    return false;
+  }
+
+  const candidate = payload as Record<
+    string,
+    unknown
+  >;
+
+  return (
+    typeof candidate.userId === "string" &&
+    candidate.userId.trim().length > 0 &&
+    isUserRole(candidate.role)
+  );
+};
+
 export const requireAuth = (
   req: AuthenticatedRequest,
   res: Response,
@@ -20,7 +50,10 @@ export const requireAuth = (
   try {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (
+      !authHeader ||
+      !authHeader.startsWith("Bearer ")
+    ) {
       res.status(401).json({
         success: false,
         message: "Authentication required",
@@ -28,7 +61,9 @@ export const requireAuth = (
       return;
     }
 
-    const token = authHeader.split(" ")[1];
+    const token = authHeader
+      .slice("Bearer ".length)
+      .trim();
 
     if (!token) {
       res.status(401).json({
@@ -41,7 +76,9 @@ export const requireAuth = (
     const secret = process.env.JWT_SECRET;
 
     if (!secret) {
-      console.error("JWT_SECRET is not configured");
+      console.error(
+        "JWT_SECRET is not configured"
+      );
 
       res.status(500).json({
         success: false,
@@ -50,16 +87,15 @@ export const requireAuth = (
       return;
     }
 
-    const decoded = jwt.verify(token, secret) as AuthPayload;
+    const decoded = jwt.verify(
+      token,
+      secret
+    );
 
-    if (
-      decoded.role !== "USER" &&
-      decoded.role !== "MANAGER" &&
-      decoded.role !== "ADMIN"
-    ) {
+    if (!isValidAuthPayload(decoded)) {
       res.status(401).json({
         success: false,
-        message: "Invalid user role",
+        message: "Invalid authentication token",
       });
       return;
     }
@@ -71,7 +107,10 @@ export const requireAuth = (
 
     next();
   } catch (error) {
-    console.error("Authentication error:", error);
+    console.error(
+      "Authentication error:",
+      error
+    );
 
     res.status(401).json({
       success: false,
@@ -96,10 +135,13 @@ export const requireRole = (
       return;
     }
 
-    if (!allowedRoles.includes(req.user.role)) {
+    if (
+      !allowedRoles.includes(req.user.role)
+    ) {
       res.status(403).json({
         success: false,
-        message: "You do not have permission to perform this action",
+        message:
+          "You do not have permission to perform this action",
       });
       return;
     }
