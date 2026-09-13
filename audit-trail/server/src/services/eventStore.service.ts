@@ -1,4 +1,4 @@
-import { EventType } from "../generated/prisma/client.js";
+import { Prisma, EventType } from "../generated/prisma/client.js";
 
 import { prisma } from "../config/prisma.js";
 
@@ -61,18 +61,49 @@ export const appendEvent = async ({
     );
   }
 
-  const event = await prisma.event.create({
-    data: {
-      aggregateId,
-      eventType,
-      payload:
-        payload as Parameters<
-          typeof prisma.event.create
-        >[0]["data"]["payload"],
-      version: currentVersion + 1,
-      createdById,
-    },
-  });
+  const nextVersion = currentVersion + 1;
+
+  let event;
+
+  try {
+    event = await prisma.event.create({
+      data: {
+        aggregateId,
+        eventType,
+        payload:
+          payload as Parameters<
+            typeof prisma.event.create
+          >[0]["data"]["payload"],
+        version: nextVersion,
+        createdById,
+      },
+    });
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      const latestEventAfterConflict =
+        await prisma.event.findFirst({
+          where: {
+            aggregateId,
+          },
+          orderBy: {
+            version: "desc",
+          },
+        });
+
+      const actualVersion =
+        latestEventAfterConflict?.version ?? 0;
+
+      throw new VersionConflictError(
+        actualVersion,
+        expectedVersion
+      );
+    }
+
+    throw error;
+  }
 
   await projectShipmentEvent(event);
 
