@@ -23,6 +23,21 @@ type ShipmentProjection = {
   deliveredAt?: string;
 };
 
+type ShipmentReadModelRecord = {
+  aggregateId: string;
+  version: number;
+  status: string | null;
+  location: string | null;
+  containerNumber: string | null;
+  shipName: string | null;
+  port: string | null;
+  deliveredAt: string | null;
+};
+
+type DatabaseClient =
+  | typeof prisma
+  | Prisma.TransactionClient;
+
 const getPayload = (
   payload: Prisma.JsonValue
 ): Record<string, unknown> => {
@@ -48,56 +63,64 @@ const getString = (
     : undefined;
 };
 
-export const projectShipmentEvent = async (
-  event: ProjectableEvent
-) => {
+const buildProjection = (
+  event: ProjectableEvent,
+  existingProjection:
+    | ShipmentReadModelRecord
+    | null
+): ShipmentProjection => {
   const payload = getPayload(event.payload);
-
-  const existingProjection =
-    await prisma.shipmentReadModel.findUnique({
-      where: {
-        aggregateId: event.aggregateId,
-      },
-    });
-
-  if (
-    existingProjection &&
-    existingProjection.version >= event.version
-  ) {
-    return existingProjection;
-  }
 
   const projection: ShipmentProjection = {
     aggregateId: event.aggregateId,
     version: event.version,
 
-    status: existingProjection?.status ?? undefined,
-    location: existingProjection?.location ?? undefined,
+    status:
+      existingProjection?.status ??
+      undefined,
+
+    location:
+      existingProjection?.location ??
+      undefined,
+
     containerNumber:
-      existingProjection?.containerNumber ?? undefined,
+      existingProjection?.containerNumber ??
+      undefined,
+
     shipName:
-      existingProjection?.shipName ?? undefined,
-    port: existingProjection?.port ?? undefined,
+      existingProjection?.shipName ??
+      undefined,
+
+    port:
+      existingProjection?.port ??
+      undefined,
+
     deliveredAt:
-      existingProjection?.deliveredAt ?? undefined,
+      existingProjection?.deliveredAt ??
+      undefined,
   };
 
   switch (event.eventType) {
     case EventType.CONTAINER_CREATED:
       projection.status =
-        getString(payload, "status") ?? "CREATED";
+        getString(payload, "status") ??
+        "CREATED";
 
       projection.location =
         getString(payload, "location");
 
       projection.containerNumber =
-        getString(payload, "containerNumber");
+        getString(
+          payload,
+          "containerNumber"
+        );
 
       break;
 
     case EventType.LOADED_ON_SHIP:
       projection.status =
-        getString(payload, "status") ?? "LOADED";
+        getString(payload, "status") ??
+        "LOADED";
 
       projection.shipName =
         getString(payload, "shipName");
@@ -109,7 +132,8 @@ export const projectShipmentEvent = async (
 
     case EventType.ARRIVED_AT_PORT:
       projection.status =
-        getString(payload, "status") ?? "ARRIVED";
+        getString(payload, "status") ??
+        "ARRIVED";
 
       projection.port =
         getString(payload, "port");
@@ -122,7 +146,8 @@ export const projectShipmentEvent = async (
 
     case EventType.MOVED:
       projection.status =
-        getString(payload, "status") ?? "MOVED";
+        getString(payload, "status") ??
+        "MOVED";
 
       projection.location =
         getString(payload, "location") ??
@@ -132,10 +157,14 @@ export const projectShipmentEvent = async (
 
     case EventType.DELIVERED:
       projection.status =
-        getString(payload, "status") ?? "DELIVERED";
+        getString(payload, "status") ??
+        "DELIVERED";
 
       projection.deliveredAt =
-        getString(payload, "deliveredAt");
+        getString(
+          payload,
+          "deliveredAt"
+        );
 
       projection.location =
         getString(payload, "location") ??
@@ -150,32 +179,92 @@ export const projectShipmentEvent = async (
       break;
   }
 
-  return prisma.shipmentReadModel.upsert({
+  return projection;
+};
+
+export const projectShipmentEvent = async (
+  event: ProjectableEvent,
+  db: DatabaseClient = prisma
+) => {
+  const existingProjection =
+    await db.shipmentReadModel.findUnique({
+      where: {
+        aggregateId: event.aggregateId,
+      },
+    });
+
+  if (
+    existingProjection &&
+    existingProjection.version >= event.version
+  ) {
+    return existingProjection;
+  }
+
+  const projection = buildProjection(
+    event,
+    existingProjection
+  );
+
+  if (!existingProjection) {
+    return db.shipmentReadModel.create({
+      data: {
+        aggregateId:
+          projection.aggregateId,
+        version:
+          projection.version,
+        status:
+          projection.status,
+        location:
+          projection.location,
+        containerNumber:
+          projection.containerNumber,
+        shipName:
+          projection.shipName,
+        port:
+          projection.port,
+        deliveredAt:
+          projection.deliveredAt,
+      },
+    });
+  }
+
+  const updatedProjection =
+    await db.shipmentReadModel.updateMany({
+      where: {
+        aggregateId: event.aggregateId,
+        version: {
+          lt: event.version,
+        },
+      },
+      data: {
+        version:
+          projection.version,
+        status:
+          projection.status,
+        location:
+          projection.location,
+        containerNumber:
+          projection.containerNumber,
+        shipName:
+          projection.shipName,
+        port:
+          projection.port,
+        deliveredAt:
+          projection.deliveredAt,
+      },
+    });
+
+  if (updatedProjection.count === 0) {
+    return db.shipmentReadModel.findUnique({
+      where: {
+        aggregateId: event.aggregateId,
+      },
+    });
+  }
+
+  return db.shipmentReadModel.findUnique({
     where: {
       aggregateId: event.aggregateId,
-    },
-
-    create: {
-      aggregateId: projection.aggregateId,
-      version: projection.version,
-      status: projection.status,
-      location: projection.location,
-      containerNumber:
-        projection.containerNumber,
-      shipName: projection.shipName,
-      port: projection.port,
-      deliveredAt: projection.deliveredAt,
-    },
-
-    update: {
-      version: projection.version,
-      status: projection.status,
-      location: projection.location,
-      containerNumber:
-        projection.containerNumber,
-      shipName: projection.shipName,
-      port: projection.port,
-      deliveredAt: projection.deliveredAt,
     },
   });
 };
@@ -183,37 +272,46 @@ export const projectShipmentEvent = async (
 export const rebuildShipmentProjection = async (
   aggregateId: string
 ) => {
-  await prisma.shipmentReadModel.deleteMany({
-    where: {
-      aggregateId,
-    },
-  });
-
-  const events = await prisma.event.findMany({
-    where: {
-      aggregateId,
-    },
-    orderBy: {
-      version: "asc",
-    },
-  });
-
-  if (events.length === 0) {
-    return null;
-  }
-
-  for (const event of events) {
-    await projectShipmentEvent({
-      aggregateId: event.aggregateId,
-      eventType: event.eventType,
-      payload: event.payload,
-      version: event.version,
+  return prisma.$transaction(async (tx) => {
+    await tx.shipmentReadModel.deleteMany({
+      where: {
+        aggregateId,
+      },
     });
-  }
 
-  return prisma.shipmentReadModel.findUnique({
-    where: {
-      aggregateId,
-    },
+    const events = await tx.event.findMany({
+      where: {
+        aggregateId,
+      },
+      orderBy: {
+        version: "asc",
+      },
+    });
+
+    if (events.length === 0) {
+      return null;
+    }
+
+    for (const event of events) {
+      await projectShipmentEvent(
+        {
+          aggregateId:
+            event.aggregateId,
+          eventType:
+            event.eventType,
+          payload:
+            event.payload,
+          version:
+            event.version,
+        },
+        tx
+      );
+    }
+
+    return tx.shipmentReadModel.findUnique({
+      where: {
+        aggregateId,
+      },
+    });
   });
 };

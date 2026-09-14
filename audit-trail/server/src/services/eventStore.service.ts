@@ -1,8 +1,13 @@
-import { Prisma, EventType } from "../generated/prisma/client.js";
+import {
+  Prisma,
+  EventType,
+} from "../generated/prisma/client.js";
 
 import { prisma } from "../config/prisma.js";
 
-import { projectShipmentEvent } from "./shipmentProjector.service.js";
+import {
+  projectShipmentEvent,
+} from "./shipmentProjector.service.js";
 
 interface AppendEventInput {
   aggregateId: string;
@@ -31,8 +36,12 @@ export class VersionConflictError extends Error {
     );
 
     this.name = "VersionConflictError";
-    this.currentVersion = currentVersion;
-    this.expectedVersion = expectedVersion;
+
+    this.currentVersion =
+      currentVersion;
+
+    this.expectedVersion =
+      expectedVersion;
   }
 }
 
@@ -43,44 +52,67 @@ export const appendEvent = async ({
   expectedVersion,
   createdById,
 }: AppendEventInput) => {
-  const latestEvent = await prisma.event.findFirst({
-    where: {
-      aggregateId,
-    },
-    orderBy: {
-      version: "desc",
-    },
-  });
-
-  const currentVersion = latestEvent?.version ?? 0;
-
-  if (currentVersion !== expectedVersion) {
-    throw new VersionConflictError(
-      currentVersion,
-      expectedVersion
-    );
-  }
-
-  const nextVersion = currentVersion + 1;
-
-  let event;
-
   try {
-    event = await prisma.event.create({
-      data: {
-        aggregateId,
-        eventType,
-        payload:
-          payload as Parameters<
-            typeof prisma.event.create
-          >[0]["data"]["payload"],
-        version: nextVersion,
-        createdById,
-      },
-    });
+    return await prisma.$transaction(
+      async (tx) => {
+        const latestEvent =
+          await tx.event.findFirst({
+            where: {
+              aggregateId,
+            },
+            orderBy: {
+              version: "desc",
+            },
+          });
+
+        const currentVersion =
+          latestEvent?.version ?? 0;
+
+        if (
+          currentVersion !==
+          expectedVersion
+        ) {
+          throw new VersionConflictError(
+            currentVersion,
+            expectedVersion
+          );
+        }
+
+        const nextVersion =
+          currentVersion + 1;
+
+        const event =
+          await tx.event.create({
+            data: {
+              aggregateId,
+              eventType,
+              payload:
+                payload as Parameters<
+                  typeof tx.event.create
+                >[0]["data"]["payload"],
+              version: nextVersion,
+              createdById,
+            },
+          });
+
+        await projectShipmentEvent(
+          event,
+          tx
+        );
+
+        return event;
+      }
+    );
   } catch (error) {
     if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error instanceof VersionConflictError
+    ) {
+      throw error;
+    }
+
+    if (
+      error instanceof
+        Prisma.PrismaClientKnownRequestError &&
       error.code === "P2002"
     ) {
       const latestEventAfterConflict =
@@ -94,7 +126,8 @@ export const appendEvent = async ({
         });
 
       const actualVersion =
-        latestEventAfterConflict?.version ?? 0;
+        latestEventAfterConflict
+          ?.version ?? 0;
 
       throw new VersionConflictError(
         actualVersion,
@@ -104,10 +137,6 @@ export const appendEvent = async ({
 
     throw error;
   }
-
-  await projectShipmentEvent(event);
-
-  return event;
 };
 
 export const getEventsByAggregateId = async (
