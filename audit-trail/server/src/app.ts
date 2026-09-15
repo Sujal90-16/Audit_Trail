@@ -7,6 +7,9 @@ import authRoutes from "./routes/auth.routes.js";
 import eventRoutes from "./routes/event.routes.js";
 import shipmentRoutes from "./routes/shipment.routes.js";
 
+import { notFoundMiddleware } from "./middleware/not-found.middleware.js";
+import { errorMiddleware } from "./middleware/error.middleware.js";
+
 const app = express();
 
 app.use(helmet());
@@ -20,7 +23,11 @@ app.use(
 
 app.use(express.json());
 
-app.use(express.urlencoded({ extended: true }));
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
+);
 
 app.use(morgan("dev"));
 
@@ -33,7 +40,13 @@ app.get("/health", (_req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+
 app.use("/api/events", eventRoutes);
+
 app.use("/api/shipments", shipmentRoutes);
+
+app.use(notFoundMiddleware);
+
+app.use(errorMiddleware);
 
 export default app;

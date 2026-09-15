@@ -14,6 +14,8 @@ import {
 
 import { requireRole } from "../middleware/role.middleware.js";
 
+import { asyncHandler } from "../utils/async-handler.js";
+
 const router = Router();
 
 /*
@@ -25,9 +27,7 @@ router.post(
   "/",
   requireAuth,
   requireRole("MANAGER", "ADMIN"),
-  (req: AuthenticatedRequest, res, next) => {
-    void createEvent(req, res).catch(next);
-  }
+  asyncHandler<AuthenticatedRequest>(createEvent)
 );
 
 /*
@@ -39,12 +39,9 @@ router.post(
   "/:aggregateId/rebuild",
   requireAuth,
   requireRole("MANAGER", "ADMIN"),
-  (req: AuthenticatedRequest, res, next) => {
-    void rebuildShipmentProjectionController(
-      req,
-      res
-    ).catch(next);
-  }
+  asyncHandler<AuthenticatedRequest>(
+    rebuildShipmentProjectionController
+  )
 );
 
 /*
@@ -56,9 +53,9 @@ router.post(
 router.get(
   "/:aggregateId/state",
   requireAuth,
-  (req: AuthenticatedRequest, res, next) => {
-    void getShipmentState(req, res).catch(next);
-  }
+  asyncHandler<AuthenticatedRequest>(
+    getShipmentState
+  )
 );
 
 /*
@@ -69,9 +66,9 @@ router.get(
 router.get(
   "/:aggregateId",
   requireAuth,
-  (req: AuthenticatedRequest, res, next) => {
-    void getEvents(req, res).catch(next);
-  }
+  asyncHandler<AuthenticatedRequest>(
+    getEvents
+  )
 );
 
 export default router;
