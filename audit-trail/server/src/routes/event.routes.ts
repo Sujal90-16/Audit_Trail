@@ -16,6 +16,14 @@ import { requireRole } from "../middleware/role.middleware.js";
 
 import { asyncHandler } from "../utils/async-handler.js";
 
+import { validate } from "../middleware/validation.middleware.js";
+
+import {
+  aggregateIdParamsSchema,
+  createEventSchema,
+  getEventsQuerySchema,
+} from "../validators/event.validator.js";
+
 const router = Router();
 
 /*
@@ -27,6 +35,7 @@ router.post(
   "/",
   requireAuth,
   requireRole("MANAGER", "ADMIN"),
+  validate(createEventSchema, "body"),
   asyncHandler<AuthenticatedRequest>(createEvent)
 );
 
@@ -39,6 +48,10 @@ router.post(
   "/:aggregateId/rebuild",
   requireAuth,
   requireRole("MANAGER", "ADMIN"),
+  validate(
+    aggregateIdParamsSchema,
+    "params"
+  ),
   asyncHandler<AuthenticatedRequest>(
     rebuildShipmentProjectionController
   )
@@ -53,6 +66,10 @@ router.post(
 router.get(
   "/:aggregateId/state",
   requireAuth,
+  validate(
+    aggregateIdParamsSchema,
+    "params"
+  ),
   asyncHandler<AuthenticatedRequest>(
     getShipmentState
   )
@@ -66,6 +83,14 @@ router.get(
 router.get(
   "/:aggregateId",
   requireAuth,
+  validate(
+    aggregateIdParamsSchema,
+    "params"
+  ),
+  validate(
+    getEventsQuerySchema,
+    "query"
+  ),
   asyncHandler<AuthenticatedRequest>(
     getEvents
   )

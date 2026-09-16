@@ -10,6 +10,13 @@ import { requireAuth } from "../middleware/auth.middleware.js";
 
 import { asyncHandler } from "../utils/async-handler.js";
 
+import { validate } from "../middleware/validation.middleware.js";
+
+import {
+  getShipmentsQuerySchema,
+  shipmentAggregateIdParamsSchema,
+} from "../validators/shipment.validator.js";
+
 const router = Router();
 
 // Get shipment dashboard statistics
@@ -23,6 +30,10 @@ router.get(
 router.get(
   "/",
   requireAuth,
+  validate(
+    getShipmentsQuerySchema,
+    "query"
+  ),
   asyncHandler(getAllShipments)
 );
 
@@ -30,6 +41,10 @@ router.get(
 router.get(
   "/:aggregateId",
   requireAuth,
+  validate(
+    shipmentAggregateIdParamsSchema,
+    "params"
+  ),
   asyncHandler(getShipmentById)
 );
 
