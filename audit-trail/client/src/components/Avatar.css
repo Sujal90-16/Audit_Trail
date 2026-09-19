@@ -1,0 +1,107 @@
+/* ========================================
+   Avatar Component
+   ======================================== */
+
+.avatar {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+/* Sizes */
+.avatar--xs { width: 24px; height: 24px; }
+.avatar--sm { width: 32px; height: 32px; }
+.avatar--md { width: 40px; height: 40px; }
+.avatar--lg { width: 56px; height: 56px; }
+
+.avatar-initials {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: var(--font-weight-bold);
+  user-select: none;
+  border: 2px solid var(--color-bg-secondary);
+  transition: transform var(--transition-fast);
+}
+
+.avatar:hover .avatar-initials {
+  transform: scale(1.08);
+}
+
+.avatar--xs .avatar-initials { font-size: 0.55rem; }
+.avatar--sm .avatar-initials { font-size: 0.65rem; }
+.avatar--md .avatar-initials { font-size: var(--font-size-sm); }
+.avatar--lg .avatar-initials { font-size: var(--font-size-lg); }
+
+.avatar-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--color-bg-secondary);
+}
+
+/* Status indicator */
+.avatar-status {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--color-bg-secondary);
+}
+
+.avatar--xs .avatar-status,
+.avatar--sm .avatar-status { width: 8px; height: 8px; }
+
+.avatar-status--online {
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.4);
+}
+
+.avatar-status--away {
+  background: #f59e0b;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.4);
+}
+
+.avatar-status--busy {
+  background: #ef4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.4);
+}
+
+/* Avatar Group — stacked overlapping */
+.avatar-group {
+  display: flex;
+  align-items: center;
+}
+
+.avatar-group .avatar {
+  margin-left: -8px;
+  transition: all var(--transition-fast);
+}
+
+.avatar-group .avatar:first-child {
+  margin-left: 0;
+}
+
+.avatar-group .avatar:hover {
+  z-index: 10;
+  transform: translateY(-2px);
+}
+
+.avatar-overflow .avatar-initials {
+  background: var(--color-bg-input) !important;
+  color: var(--color-text-muted) !important;
+  border-color: var(--color-border);
+  font-family: var(--font-mono);
+}
+
+.avatar-overflow-text {
+  font-weight: var(--font-weight-bold);
+}
