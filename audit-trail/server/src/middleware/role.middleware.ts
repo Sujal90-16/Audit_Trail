@@ -5,10 +5,11 @@ import type {
 
 import type {
   AuthenticatedRequest,
+  UserRole,
 } from "./auth.middleware.js";
 
 export const requireRole = (
-  ...allowedRoles: string[]
+  ...allowedRoles: UserRole[]
 ) => {
   return (
     req: AuthenticatedRequest,
@@ -23,7 +24,9 @@ export const requireRole = (
       return;
     }
 
-    if (!allowedRoles.includes(req.user.role)) {
+    if (
+      !allowedRoles.includes(req.user.role)
+    ) {
       res.status(403).json({
         success: false,
         message:

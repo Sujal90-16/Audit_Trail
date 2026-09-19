@@ -1,18 +1,29 @@
-import type { NextFunction, Request, Response } from "express";
+import type {
+  NextFunction,
+  Request,
+  Response,
+} from "express";
+
 import jwt from "jsonwebtoken";
 
-export type UserRole = "USER" | "MANAGER" | "ADMIN";
+export type UserRole =
+  | "USER"
+  | "MANAGER"
+  | "ADMIN";
 
 interface AuthPayload {
   userId: string;
   role: UserRole;
 }
 
-export interface AuthenticatedRequest extends Request {
+export interface AuthenticatedRequest
+  extends Request {
   user?: AuthPayload;
 }
 
-const isUserRole = (value: unknown): value is UserRole => {
+const isUserRole = (
+  value: unknown
+): value is UserRole => {
   return (
     value === "USER" ||
     value === "MANAGER" ||
@@ -48,7 +59,8 @@ export const requireAuth = (
   next: NextFunction
 ): void => {
   try {
-    const authHeader = req.headers.authorization;
+    const authHeader =
+      req.headers.authorization;
 
     if (
       !authHeader ||
@@ -68,7 +80,8 @@ export const requireAuth = (
     if (!token) {
       res.status(401).json({
         success: false,
-        message: "Authentication token is missing",
+        message:
+          "Authentication token is missing",
       });
       return;
     }
@@ -95,7 +108,8 @@ export const requireAuth = (
     if (!isValidAuthPayload(decoded)) {
       res.status(401).json({
         success: false,
-        message: "Invalid authentication token",
+        message:
+          "Invalid authentication token",
       });
       return;
     }
@@ -114,38 +128,8 @@ export const requireAuth = (
 
     res.status(401).json({
       success: false,
-      message: "Invalid or expired token",
+      message:
+        "Invalid or expired token",
     });
   }
-};
-
-export const requireRole = (
-  ...allowedRoles: UserRole[]
-) => {
-  return (
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-  ): void => {
-    if (!req.user) {
-      res.status(401).json({
-        success: false,
-        message: "Authentication required",
-      });
-      return;
-    }
-
-    if (
-      !allowedRoles.includes(req.user.role)
-    ) {
-      res.status(403).json({
-        success: false,
-        message:
-          "You do not have permission to perform this action",
-      });
-      return;
-    }
-
-    next();
-  };
 };

@@ -12,17 +12,26 @@ import {
 
 import { asyncHandler } from "../utils/async-handler.js";
 
+import { validate } from "../middleware/validation.middleware.js";
+
+import {
+  registerSchema,
+  loginSchema,
+} from "../validators/auth.validator.js";
+
 const router = Router();
 
 // Register
 router.post(
   "/register",
+  validate(registerSchema, "body"),
   asyncHandler(register)
 );
 
 // Login
 router.post(
   "/login",
+  validate(loginSchema, "body"),
   asyncHandler(login)
 );
 
@@ -30,7 +39,10 @@ router.post(
 router.get(
   "/me",
   requireAuth,
-  (req: AuthenticatedRequest, res) => {
+  (
+    req: AuthenticatedRequest,
+    res
+  ) => {
     res.status(200).json({
       success: true,
       message: "Authenticated user",
