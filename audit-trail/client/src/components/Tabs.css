@@ -1,0 +1,117 @@
+/* ========================================
+   Tabs Component
+   ======================================== */
+
+.tabs {
+  display: flex;
+  gap: 0;
+  position: relative;
+}
+
+/* Underline variant */
+.tabs--underline {
+  border-bottom: 1px solid var(--color-border-light);
+  gap: var(--space-1);
+}
+
+.tabs--underline .tab-item {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all var(--transition-base);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  white-space: nowrap;
+}
+
+.tabs--underline .tab-item:hover:not(.tab-item--disabled) {
+  color: var(--color-text-primary);
+  background: var(--color-bg-input);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.tabs--underline .tab-item--active {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-semibold);
+  border-bottom-color: var(--color-accent);
+}
+
+/* Pills variant */
+.tabs--pills {
+  gap: var(--space-2);
+  padding: 3px;
+  background: var(--color-bg-input);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border-light);
+}
+
+.tabs--pills .tab-item {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  border-radius: var(--radius-full);
+  transition: all var(--transition-base);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  white-space: nowrap;
+}
+
+.tabs--pills .tab-item:hover:not(.tab-item--disabled) {
+  color: var(--color-text-primary);
+}
+
+.tabs--pills .tab-item--active {
+  background: var(--gradient-primary);
+  color: white;
+  font-weight: var(--font-weight-semibold);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+/* Disabled */
+.tab-item--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Icon */
+.tab-icon {
+  display: flex;
+  align-items: center;
+  opacity: 0.7;
+}
+
+.tab-item--active .tab-icon {
+  opacity: 1;
+}
+
+/* Badge */
+.tab-badge {
+  font-size: 0.6rem;
+  font-weight: var(--font-weight-bold);
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-input);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+}
+
+.tab-badge--active {
+  background: rgba(102, 126, 234, 0.15);
+  color: var(--color-accent);
+}
+
+.tabs--pills .tab-badge--active {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* TabPanel */
+.tab-panel {
+  padding-top: var(--space-5);
+}
