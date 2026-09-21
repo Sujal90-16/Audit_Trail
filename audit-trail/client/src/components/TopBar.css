@@ -1,0 +1,79 @@
+/* ========================================
+   TopBar Component
+   ======================================== */
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) 0;
+  margin-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.top-bar-left {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.top-bar-greeting {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+.top-bar-user {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-bold);
+}
+
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.top-bar-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--color-border);
+}
+
+.top-bar-profile {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  transition: background var(--transition-fast);
+  cursor: pointer;
+}
+
+.top-bar-profile:hover {
+  background: var(--color-bg-input);
+}
+
+.top-bar-profile-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.top-bar-profile-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+.top-bar-profile-role {
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 600px) {
+  .top-bar-profile-info {
+    display: none;
+  }
+}

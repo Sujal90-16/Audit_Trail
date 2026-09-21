@@ -8,12 +8,14 @@ import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
 import Sidebar from './components/Sidebar';
+import TopBar from './components/TopBar';
 
 function App() {
   return (
     <div className="app-layout">
       <Sidebar />
       <main className="main-content">
+        <TopBar />
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/shipments" element={<Shipments />} />
