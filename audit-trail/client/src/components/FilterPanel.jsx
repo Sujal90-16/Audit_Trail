@@ -15,7 +15,6 @@ import './FilterPanel.css';
  * @param {Function} onApply - Callback with filter state object
  * @param {Function} onClear - Callback to reset all filters
  */
-
 const FILTER_SECTIONS = [
   {
     id: 'status',
