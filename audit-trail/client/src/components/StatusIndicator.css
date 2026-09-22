@@ -1,0 +1,118 @@
+/* ========================================
+   StatusIndicator Component
+   ======================================== */
+
+/* Dot variant */
+.status-dot-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--status-color);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.status-dot-indicator--connected,
+.status-dot-indicator--syncing {
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--status-color) 40%, transparent); }
+  50%      { box-shadow: 0 0 0 6px color-mix(in srgb, var(--status-color) 0%, transparent); }
+}
+
+.status-dot-indicator--error {
+  animation: statusBlink 1.2s ease infinite;
+}
+
+@keyframes statusBlink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+
+/* Badge variant */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid color-mix(in srgb, var(--status-color) 20%, transparent);
+  background: color-mix(in srgb, var(--status-color) 6%, transparent);
+  transition: all var(--transition-fast);
+}
+
+.status-badge:hover {
+  background: color-mix(in srgb, var(--status-color) 10%, transparent);
+}
+
+.status-badge-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--status-color);
+}
+
+.status-badge-desc {
+  font-size: 0.6rem;
+  color: var(--color-text-muted);
+  margin-left: var(--space-1);
+}
+
+/* Card variant */
+.status-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-card);
+  border: 1px solid color-mix(in srgb, var(--status-color) 15%, var(--color-border));
+  transition: all var(--transition-base);
+}
+
+.status-card:hover {
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--status-color) 10%, transparent);
+}
+
+.status-card-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--status-color) 10%, transparent);
+}
+
+.status-card-icon .status-dot-indicator {
+  width: 10px;
+  height: 10px;
+}
+
+.status-card-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.status-card-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.status-card-desc {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.status-card-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid color-mix(in srgb, var(--status-color) 20%, transparent);
+  border-top-color: var(--status-color);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
