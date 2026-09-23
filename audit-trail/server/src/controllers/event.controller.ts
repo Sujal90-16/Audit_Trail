@@ -61,7 +61,13 @@ export const createEvent = async (
     if (error instanceof VersionConflictError) {
       throw new AppError(
         "Version conflict",
-        409
+        409,
+        {
+          currentVersion:
+            error.currentVersion,
+          expectedVersion:
+            error.expectedVersion,
+        }
       );
     }
 

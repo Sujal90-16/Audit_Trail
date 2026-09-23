@@ -13,15 +13,18 @@ import {
 
 export class AppError extends Error {
   statusCode: number;
+  details?: unknown;
 
   constructor(
     message: string,
-    statusCode: number
+    statusCode: number,
+    details?: unknown
   ) {
     super(message);
 
     this.name = "AppError";
     this.statusCode = statusCode;
+    this.details = details;
 
     Object.setPrototypeOf(
       this,
@@ -41,16 +44,20 @@ export const errorMiddleware: ErrorRequestHandler = (
     error
   );
 
-  // Application errors
   if (error instanceof AppError) {
     res.status(error.statusCode).json({
       success: false,
       message: error.message,
+      ...(error.details !== undefined
+        ? {
+            details: error.details,
+          }
+        : {}),
     });
+
     return;
   }
 
-  // Prisma known request errors
   if (
     error instanceof
     Prisma.PrismaClientKnownRequestError
@@ -82,7 +89,6 @@ export const errorMiddleware: ErrorRequestHandler = (
     }
   }
 
-  // Prisma validation errors
   if (
     error instanceof
     Prisma.PrismaClientValidationError
@@ -92,32 +98,34 @@ export const errorMiddleware: ErrorRequestHandler = (
       message:
         "Database request validation failed",
     });
-    return;
-  }
 
-  // JWT errors
-  if (error instanceof jwt.JsonWebTokenError) {
-    res.status(401).json({
-      success: false,
-      message:
-        "Invalid authentication token",
-    });
     return;
   }
 
   if (
-    error instanceof
-    jwt.TokenExpiredError
+    error instanceof jwt.TokenExpiredError
   ) {
     res.status(401).json({
       success: false,
       message:
         "Authentication token has expired",
     });
+
     return;
   }
 
-  // Unknown/unexpected errors
+  if (
+    error instanceof jwt.JsonWebTokenError
+  ) {
+    res.status(401).json({
+      success: false,
+      message:
+        "Invalid authentication token",
+    });
+
+    return;
+  }
+
   res.status(500).json({
     success: false,
     message: "Internal server error",
