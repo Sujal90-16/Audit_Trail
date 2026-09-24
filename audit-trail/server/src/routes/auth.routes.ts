@@ -19,6 +19,10 @@ import {
   loginSchema,
 } from "../validators/auth.validator.js";
 
+import {
+  authRateLimiter,
+} from "../middleware/rate-limit.middleware.js";
+
 const router = Router();
 
 // Register
@@ -31,6 +35,7 @@ router.post(
 // Login
 router.post(
   "/login",
+  authRateLimiter,
   validate(loginSchema, "body"),
   asyncHandler(login)
 );
