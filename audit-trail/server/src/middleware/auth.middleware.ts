@@ -95,14 +95,18 @@ export const requireAuth = (
 
       res.status(500).json({
         success: false,
-        message: "Server configuration error",
+        message:
+          "Server configuration error",
       });
       return;
     }
 
     const decoded = jwt.verify(
       token,
-      secret
+      secret,
+      {
+        algorithms: ["HS256"],
+      }
     );
 
     if (!isValidAuthPayload(decoded)) {
@@ -126,10 +130,34 @@ export const requireAuth = (
       error
     );
 
-    res.status(401).json({
+    if (
+      error instanceof
+      jwt.TokenExpiredError
+    ) {
+      res.status(401).json({
+        success: false,
+        message:
+          "Authentication token has expired",
+      });
+      return;
+    }
+
+    if (
+      error instanceof
+      jwt.JsonWebTokenError
+    ) {
+      res.status(401).json({
+        success: false,
+        message:
+          "Invalid authentication token",
+      });
+      return;
+    }
+
+    res.status(500).json({
       success: false,
       message:
-        "Invalid or expired token",
+        "Authentication service error",
     });
   }
 };
