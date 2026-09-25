@@ -143,10 +143,12 @@ function CommandPanel({ isOpen, onClose }) {
   return (
     <>
       {/* Backdrop */}
-      <div
-        className={`command-backdrop ${isOpen ? 'command-backdrop--visible' : ''}`}
-        onClick={onClose}
-      />
+      {isOpen && (
+        <div
+          className="command-backdrop command-backdrop--visible"
+          onClick={onClose}
+        />
+      )}
 
       {/* Panel */}
       <div
