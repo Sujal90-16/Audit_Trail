@@ -1,0 +1,132 @@
+/* ========================================
+   ActivityHeatmap Component
+   ======================================== */
+
+.heatmap {
+  overflow: hidden;
+}
+
+.heatmap-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.heatmap-title {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.heatmap-total {
+  font-size: var(--font-size-xs);
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
+  padding: 2px 8px;
+  background: var(--color-bg-input);
+  border-radius: var(--radius-full);
+}
+
+.heatmap-wrapper {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding-bottom: var(--space-2);
+}
+
+/* Day labels column */
+.heatmap-day-labels {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-top: 20px; /* align with grid, below month labels */
+}
+
+.heatmap-day-label {
+  height: 13px;
+  display: flex;
+  align-items: center;
+  font-size: 0.55rem;
+  color: var(--color-text-muted);
+  line-height: 1;
+}
+
+/* Grid area */
+.heatmap-grid-area {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Month labels */
+.heatmap-month-labels {
+  display: grid;
+  height: 16px;
+  margin-bottom: 4px;
+}
+
+.heatmap-month-label {
+  font-size: 0.6rem;
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Grid */
+.heatmap-grid {
+  display: grid;
+  gap: 3px;
+}
+
+.heatmap-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+/* Cells */
+.heatmap-cell {
+  width: 13px;
+  height: 13px;
+  border-radius: 2px;
+  transition: all 0.15s ease;
+}
+
+.heatmap-cell:hover {
+  transform: scale(1.3);
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+  z-index: 10;
+}
+
+.heatmap-cell--level-0 { background: var(--color-bg-input); }
+.heatmap-cell--level-1 { background: rgba(102, 126, 234, 0.2); }
+.heatmap-cell--level-2 { background: rgba(102, 126, 234, 0.4); }
+.heatmap-cell--level-3 { background: rgba(102, 126, 234, 0.65); }
+.heatmap-cell--level-4 { background: rgba(102, 126, 234, 0.9); }
+
+/* Legend */
+.heatmap-legend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.heatmap-legend-label {
+  font-size: 0.6rem;
+  color: var(--color-text-muted);
+  margin: 0 var(--space-1);
+}
+
+.heatmap-legend-cell {
+  width: 11px;
+  height: 11px;
+}
+
+.heatmap-legend-cell:hover {
+  transform: none;
+  outline: none;
+}
