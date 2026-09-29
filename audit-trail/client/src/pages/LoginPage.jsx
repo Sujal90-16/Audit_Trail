@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { authApi } from '../services/api';
 import './LoginPage.css';
 
 /**
  * LoginPage — Authentication entry point for the Audit Trail system.
- * Validates credentials and redirects to the dashboard.
+ * Attempts real API login, falls back to demo mode if backend is unavailable.
  */
 function LoginPage({ onLogin }) {
   const navigate = useNavigate();
@@ -28,13 +29,27 @@ function LoginPage({ onLogin }) {
     }
 
     setLoading(true);
-    // Simulate authentication
-    await new Promise((r) => setTimeout(r, 1200));
 
-    // Accept any credentials for demo
-    setLoading(false);
-    onLogin({ email, name: email.split('@')[0] });
-    navigate('/');
+    try {
+      // Attempt real API login
+      const response = await authApi.login({ email: email.trim(), password });
+      const { token, user } = response.data;
+      localStorage.setItem('audit_trail_token', token);
+      setLoading(false);
+      onLogin({ email: user.email, name: user.name || email.split('@')[0] });
+      navigate('/');
+    } catch (err) {
+      // Fall back to demo mode if backend is unavailable
+      if (!err.response || err.code === 'ERR_NETWORK') {
+        await new Promise((r) => setTimeout(r, 800));
+        setLoading(false);
+        onLogin({ email, name: email.split('@')[0] });
+        navigate('/');
+      } else {
+        setLoading(false);
+        setError(err.response?.data?.message || 'Invalid credentials');
+      }
+    }
   };
 
   return (

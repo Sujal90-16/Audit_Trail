@@ -299,3 +299,41 @@
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
 }
+
+/* Progress Section */
+.detail-progress-section {
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-6);
+}
+
+.detail-progress-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.detail-progress-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.detail-progress-value {
+  font-size: var(--font-size-sm);
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-accent);
+}
+
+.detail-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.detail-skeleton {
+  padding: var(--space-6) 0;
+}
