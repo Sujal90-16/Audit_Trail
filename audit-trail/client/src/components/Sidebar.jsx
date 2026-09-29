@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import StatusIndicator from './StatusIndicator';
 import './Sidebar.css';
 
 function Sidebar() {
@@ -88,8 +89,7 @@ function Sidebar() {
           <span>Help & Docs</span>
         </NavLink>
         <div className="sidebar-status">
-          <span className="status-dot"></span>
-          <span className="status-text">System Active</span>
+          <StatusIndicator status="connected" variant="badge" />
         </div>
       </div>
     </aside>

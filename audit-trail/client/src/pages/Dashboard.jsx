@@ -5,6 +5,10 @@ import SearchBar from '../components/SearchBar';
 import StatsCard from '../components/StatsCard';
 import RecentActivity from '../components/RecentActivity';
 import CommandPanel from '../components/CommandPanel';
+import ActivityHeatmap from '../components/ActivityHeatmap';
+import ExportButton from '../components/ExportButton';
+import StatusIndicator from '../components/StatusIndicator';
+import { useEventSource } from '../hooks/useUtils';
 import './Dashboard.css';
 
 /**
@@ -25,6 +29,7 @@ function Dashboard() {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const [commandPanelOpen, setCommandPanelOpen] = useState(false);
+  const { eventCount, isConnected } = useEventSource(true, 15000);
   const [recentSearches, setRecentSearches] = useState([
     'SHIP-2024-0847',
     'SHIP-2024-0621',
@@ -40,7 +45,6 @@ function Dashboard() {
       return;
     }
 
-    // Add to recent searches (avoid duplicates, keep max 5)
     setRecentSearches((prev) => {
       const filtered = prev.filter((s) => s !== trimmed);
       return [trimmed, ...filtered].slice(0, 5);
@@ -54,6 +58,10 @@ function Dashboard() {
     navigate(`/shipment/${shipmentId}`);
   };
 
+  const handleExport = (format) => {
+    addToast({ type: 'success', message: `Dashboard data exported as ${format.toUpperCase()}` });
+  };
+
   return (
     <div className="dashboard animate-fade-in">
       <CommandPanel isOpen={commandPanelOpen} onClose={() => setCommandPanelOpen(false)} />
@@ -65,16 +73,14 @@ function Dashboard() {
           </p>
         </div>
         <div className="header-actions">
+          <ExportButton label="Export" onExport={handleExport} />
           <button className="new-command-btn" onClick={() => setCommandPanelOpen(true)}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
             New Command
           </button>
-          <div className="header-badge">
-            <span className="badge-dot"></span>
-            <span>Live</span>
-          </div>
+          <StatusIndicator status={isConnected ? 'connected' : 'error'} variant="badge" />
         </div>
       </header>
 
@@ -106,7 +112,7 @@ function Dashboard() {
         />
         <StatsCard
           title="Events Today"
-          value="3,891"
+          value={`${(3891 + eventCount).toLocaleString()}`}
           change="+8%"
           changeType="positive"
           icon="activity"
@@ -131,7 +137,7 @@ function Dashboard() {
       <section className="quick-actions">
         <h2 className="section-title">Quick Actions</h2>
         <div className="actions-grid">
-          <button className="action-card" onClick={() => navigate('/shipment/search')}>
+          <button className="action-card" onClick={() => navigate('/shipments')}>
             <div className="action-icon action-icon--search">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8"/>
@@ -153,7 +159,7 @@ function Dashboard() {
             <span className="action-desc">Browse event history</span>
           </button>
 
-          <button className="action-card">
+          <button className="action-card" onClick={() => navigate('/analytics')}>
             <div className="action-icon action-icon--audit">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -163,6 +169,11 @@ function Dashboard() {
             <span className="action-desc">Immutable event store</span>
           </button>
         </div>
+      </section>
+
+      {/* Activity Heatmap */}
+      <section className="dashboard-heatmap-section">
+        <ActivityHeatmap weeks={12} title="Event Activity (12 weeks)" />
       </section>
 
       {/* Recent Activity Feed */}
