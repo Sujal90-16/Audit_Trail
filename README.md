@@ -16,11 +16,8 @@ For example:
 Shipment ID: S101
 Status: Delivered
 ```
-
 Although we know the current status, we may not know how the shipment reached that state.
-
 Audit Trail solves this problem by maintaining the complete sequence of operations:
-
 ```text
 Shipment Created
        ↓
