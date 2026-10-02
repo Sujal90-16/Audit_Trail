@@ -39,13 +39,15 @@ function LoginPage({ onLogin }) {
       onLogin({ email: user.email, name: user.name || email.split('@')[0] });
       navigate('/');
     } catch (err) {
-      // Fall back to demo mode if backend is unavailable
-      if (!err.response || err.code === 'ERR_NETWORK') {
+      const status = err.response?.status;
+      // Fall back to demo mode if backend is unavailable OR has server errors (e.g. database not configured)
+      if (!err.response || err.code === 'ERR_NETWORK' || status >= 500) {
         await new Promise((r) => setTimeout(r, 800));
         setLoading(false);
         onLogin({ email, name: email.split('@')[0] });
         navigate('/');
       } else {
+        // Only show error for actual auth failures (401, 403, 422)
         setLoading(false);
         setError(err.response?.data?.message || 'Invalid credentials');
       }
